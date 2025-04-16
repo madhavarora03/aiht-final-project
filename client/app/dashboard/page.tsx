@@ -1,6 +1,6 @@
 import FileUploader from "@/components/file-uploader";
 
-export default function Home() {
+export default function Page() {
   return (
     <div>
       <FileUploader />
