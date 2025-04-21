@@ -1,10 +1,15 @@
 import FileUploader from "@/components/file-uploader";
+import Footer from "@/components/footer";
+import Header from "@/components/header";
+import LandingPage from "@/components/landing";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <div>
-      <Link href="/dashboard">Uploader</Link>
+      {/* <Header /> */}
+      <LandingPage />
+      <Footer />
     </div>
   );
 }
