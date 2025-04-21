@@ -16,17 +16,26 @@ export default function Header() {
         </Link>
 
         <div className="ml-6 flex gap-4">
-          <Link href="/" className="btn btn-ghost btn-sm">
+          <Link href="/" className="btn btn-ghost btn-md text-md">
             Home
           </Link>
-          <Link href="/dashboard/report" className="btn btn-ghost btn-sm">
+          <Link
+            href="/dashboard/report"
+            className="btn btn-ghost btn-md text-md"
+          >
             FIR
           </Link>
-          <Link href="/dashboard/chat" className="btn btn-ghost btn-sm">
+          <Link href="/dashboard/chat" className="btn btn-ghost btn-md text-md">
             Legal Assistance
           </Link>
-          <Link href="/dashboard/video" className="btn btn-ghost btn-sm">
+          <Link
+            href="/dashboard/video"
+            className="btn btn-ghost btn-md text-md"
+          >
             Crime Prediction
+          </Link>
+          <Link href="/dashboard/map" className="btn btn-ghost btn-md text-md">
+            HeatMap
           </Link>
         </div>
       </div>
