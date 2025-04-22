@@ -1,5 +1,6 @@
 "use client";
 
+import { useNotification } from "@/components/notification";
 import axios from "axios";
 import { Camera } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +21,7 @@ export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [capturedImage, setCapturedImage] = useState<File | null>(null);
   const [geoLocation, setGeoLocation] = useState<string | null>(null);
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     navigator.mediaDevices
@@ -77,7 +79,44 @@ export default function Page() {
     return null;
   };
 
+  const handleReportUrgently = async () => {
+    if (!geoLocation) {
+      showNotification(
+        "Geolocation access is required to submit the report.",
+        "error"
+      );
+      return;
+    }
+
+    const image = captureImage();
+
+    if (!image) {
+      showNotification("Image capture failed. Please try again.", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", image);
+    formData.append("location", geoLocation);
+
+    try {
+      showNotification("Form submitted successfully.", "success");
+    } catch (error) {
+      showNotification("Error submitting report", "error");
+    }
+  };
+
   const handleSubmit = async () => {
+    if (!complaint.subject || !complaint.description) {
+      showNotification("Subject and description are required.", "error");
+      return;
+    }
+
+    if (!geoLocation) {
+      showNotification("Geolocation is required to submit the FIR.", "error");
+      return;
+    }
+
     const res = await axios.post("http://localhost:8000/api/fir", {
       subject: complaint.subject,
       description: complaint.description,
@@ -87,7 +126,7 @@ export default function Page() {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4 pt-10">
+    <div className="grid grid-cols-2 gap-4 pt-10 mx-4">
       <div className="flex flex-col items-center w-full">
         <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
           <Camera />
@@ -97,7 +136,7 @@ export default function Page() {
           ref={videoRef}
           autoPlay
           playsInline
-          className="w-full h-[500px] rounded-lg border border-primary"
+          className="w-full h-[750px]"
         />
         <canvas
           ref={canvasRef}
@@ -105,8 +144,11 @@ export default function Page() {
           width="640"
           height="480"
         ></canvas>
+        <button className="btn btn-error" onClick={handleReportUrgently}>
+          Report Urgently
+        </button>
       </div>
-      <div className="p-6 rounded-lg shadow-md w-full max-h-[500px] overflow-y-auto no-scrollbar">
+      <div className="p-6 rounded-lg shadow-md w-full max-h-[750px] overflow-y-auto no-scrollbar mt-9 bg-base-100">
         <h2 className="text-3xl font-bold text-primary mb-6">📝 File an FIR</h2>
         <p className="text-base-content/80">
           Submit an FIR anonymously or with full details.
@@ -122,36 +164,42 @@ export default function Page() {
         </div>
         {!anonymous && (
           <>
-            <label className="block text-white mt-4">Your Name</label>
+            <label className="block text-base-content mt-4">Your Name</label>
             <input
-              className="mt-2 p-3 w-full bg-gray-700 text-white border border-gray-500 placeholder-white focus:border-blue-500 focus:outline-none hover:border-blue-500"
+              className="mt-2 w-full input"
               placeholder="Your Name"
               onChange={(e) =>
                 setComplaint({ ...complaint, name: e.target.value })
               }
             />
 
-            <label className="block text-white mt-4">Your Location</label>
+            <label className="block text-base-content mt-4">
+              Your Location
+            </label>
             <input
-              className="mt-2 p-3 w-full bg-gray-700 text-white border border-gray-500 placeholder-white focus:border-blue-500 focus:outline-none hover:border-blue-500"
+              className="mt-2 w-full input"
               placeholder="Your Location"
               onChange={(e) =>
                 setComplaint({ ...complaint, location: e.target.value })
               }
             />
 
-            <label className="block text-white mt-4">Contact Number</label>
+            <label className="block text-base-content mt-4">
+              Contact Number
+            </label>
             <input
-              className="mt-2 p-3 w-full bg-gray-700 text-white border border-gray-500 placeholder-white focus:border-blue-500 focus:outline-none hover:border-blue-500"
+              className="mt-2 w-full input"
               placeholder="Contact Number"
               onChange={(e) =>
                 setComplaint({ ...complaint, contact: e.target.value })
               }
             />
 
-            <label className="block text-white mt-4">Email Address</label>
+            <label className="block text-base-content mt-4">
+              Email Address
+            </label>
             <input
-              className="mt-2 p-3 w-full bg-gray-700 text-white border border-gray-500 placeholder-white focus:border-blue-500 focus:outline-none hover:border-blue-500"
+              className="mt-2 w-full input"
               placeholder="Email Address"
               onChange={(e) =>
                 setComplaint({ ...complaint, email: e.target.value })
@@ -162,16 +210,18 @@ export default function Page() {
 
         <label className="block text-base-content mt-4">Subject</label>
         <input
-          className="mt-2 p-3 w-full bg-gray-700 text-white border border-gray-500 placeholder-white focus:border-blue-500 focus:outline-none hover:border-blue-500"
+          className="mt-2 w-full input"
           placeholder="Subject"
           onChange={(e) =>
             setComplaint({ ...complaint, subject: e.target.value })
           }
         />
 
-        <label className="block text-white mt-4">Describe the incident</label>
+        <label className="block text-base-content mt-4">
+          Describe the incident
+        </label>
         <textarea
-          className="mt-2 p-3 w-full bg-gray-700 text-white border border-gray-500 placeholder-white focus:border-blue-500 focus:outline-none hover:border-blue-500"
+          className="mt-2 w-full textarea"
           rows={4}
           placeholder="Describe the incident..."
           onChange={(e) =>
@@ -179,9 +229,15 @@ export default function Page() {
           }
         />
 
-        <label className="block text-white mt-4">Upload Evidence</label>
+        <label className="text-base-content mt-4 flex items-center gap-4">
+          Upload Evidence
+          <input type="file" className="file-input file-input-primary mt-2" />
+        </label>
 
-        <button className="btn btn-primary" onClick={handleSubmit}>
+        <button
+          className="btn btn-primary w-full block mt-6"
+          onClick={handleSubmit}
+        >
           Submit FIR
         </button>
       </div>
