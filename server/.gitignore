@@ -28,6 +28,3 @@ archive.zip
 
 # macOS
 .DS_Store
-
-# Checkpoints
-checkpoints/*.pt
